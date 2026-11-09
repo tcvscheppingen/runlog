@@ -15,7 +15,7 @@ fn haversine(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let filename: String = std::env::args().nth(1).ok_or("Usage runlog <file.gpx")?;
+    let filename: String = std::env::args().nth(1).ok_or("Usage: runlog <file.gpx>")?;
 
     let file: File =
         File::open(&filename).map_err(|e| format!("Unable to open {filename}: {e}"))?;

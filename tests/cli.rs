@@ -10,10 +10,10 @@ fn fixture(name: &str) -> PathBuf {
 
 // Run the compiled binary with the given arguments
 fn run(args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_running-cli"))
+    Command::new(env!("CARGO_BIN_EXE_runlog"))
         .args(args)
         .output()
-        .expect("Failed to run running-cli")
+        .expect("Failed to run runlog")
 }
 
 fn stdout(output: &Output) -> String {
@@ -38,7 +38,7 @@ fn missing_argument_prints_usage() {
     let output = run(&[]);
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Usage: running-cli <file.gpx>"));
+    assert!(stderr(&output).contains("Usage: runlog <file.gpx>"));
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn missing_file_fails_without_panic() {
     let output = run(&[path.to_str().unwrap()]);
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("NotFound"));
+    assert!(stderr(&output).contains("Unable to open"));
 }
 
 #[test]

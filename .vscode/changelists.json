@@ -1,0 +1,11 @@
+{
+  "changelists": [
+    {
+      "name": "Default",
+      "files": [
+        "tests/cli.rs"
+      ]
+    }
+  ],
+  "active": "Default"
+}
