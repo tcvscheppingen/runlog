@@ -27,10 +27,13 @@ fn stderr(output: &Output) -> String {
 #[test]
 fn valid_route_prints_total_distance() {
     let path = fixture("onthegomap-3.1-km-route.gpx");
-    let output = run(&[path.to_str().unwrap()]);
+    let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(0));
-    assert_eq!(stdout(&output).trim(), "Total distance: 3.16 km");
+    assert_eq!(
+        stdout(&output).trim(),
+        "Total distance: 3.16 km\nPace: 5:42 min/km"
+    );
 }
 
 #[test]
@@ -42,9 +45,18 @@ fn missing_argument_prints_usage() {
 }
 
 #[test]
+fn invalid_duration_fails_without_panic() {
+    let path = fixture("onthegomap-3.1-km-route.gpx");
+    let output = run(&[path.to_str().unwrap(), "abc"]);
+
+    assert_eq!(output.status.code(), Some(1));
+    assert!(stderr(&output).contains("Invalid duration abc"));
+}
+
+#[test]
 fn missing_file_fails_without_panic() {
     let path = fixture("does-not-exist.gpx");
-    let output = run(&[path.to_str().unwrap()]);
+    let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(stderr(&output).contains("Unable to open"));
@@ -53,7 +65,7 @@ fn missing_file_fails_without_panic() {
 #[test]
 fn invalid_gpx_prints_parse_error() {
     let path = fixture("not-gpx.txt");
-    let output = run(&[path.to_str().unwrap()]);
+    let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(stderr(&output).contains("Unable to parse gpx in"));
@@ -62,7 +74,7 @@ fn invalid_gpx_prints_parse_error() {
 #[test]
 fn gpx_without_tracks_fails() {
     let path = fixture("no-tracks.gpx");
-    let output = run(&[path.to_str().unwrap()]);
+    let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(stderr(&output).contains("GPX file contains no tracks"));
@@ -71,7 +83,7 @@ fn gpx_without_tracks_fails() {
 #[test]
 fn track_without_segments_fails() {
     let path = fixture("no-segments.gpx");
-    let output = run(&[path.to_str().unwrap()]);
+    let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(stderr(&output).contains("Track contains no segments"));

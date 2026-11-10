@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 gpx = "0.10.0"
+
+[dev-dependencies]
+# Same major version as gpx uses, so Waypoint::new accepts our Points
+geo-types = "0.7"
