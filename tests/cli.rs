@@ -26,11 +26,11 @@ fn stderr(output: &Output) -> String {
 
 #[test]
 fn valid_route_prints_total_distance() {
-    let path = fixture("onthegomap-2.5-km-route.gpx");
+    let path = fixture("onthegomap-3.1-km-route.gpx");
     let output = run(&[path.to_str().unwrap()]);
 
     assert_eq!(output.status.code(), Some(0));
-    assert_eq!(stdout(&output).trim(), "Total distance: 2.46 km");
+    assert_eq!(stdout(&output).trim(), "Total distance: 3.16 km");
 }
 
 #[test]
