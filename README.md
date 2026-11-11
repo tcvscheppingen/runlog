@@ -27,7 +27,7 @@ This project is intended as a personal learning project to teach myself some Rus
 
 Use `runlog` with a gpx file you created. You can created one with a website like: [How far did I run?](https://onthegomap.com/#/create)
 
-As of now `runlog` can only calculate the average pace and distance of your run
+As of now `runlog` can only calculate the average pace and distance of your run, more features will come.
 
 ```bash
   runlog name-of-gpx-file.gpx MM:SS # Replace MM:SS with the duration of the run in minutes and seconds.
