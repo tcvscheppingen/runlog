@@ -55,9 +55,7 @@ pub fn parse_duration(input: &str) -> Result<f64, String> {
 
             Ok(minutes)
         }
-        _ => {
-            return Err("Invalid duration input".to_string());
-        }
+        _ => Err("Invalid duration input".to_string()),
     }
 }
 
@@ -77,7 +75,7 @@ mod tests {
     // --- parse_duration: valid input ---
 
     #[rstest]
-    // plain minutes (old format keeps working)
+    // plain minutes
     #[case::whole_minutes("18", 18.0)]
     #[case::decimal_minutes("18.5", 18.5)]
     // mm:ss
@@ -92,6 +90,7 @@ mod tests {
     #[case::zero_hours("0:18:30", 18.5)] // same as 18:30
     #[case::zero_hours_and_minutes("0:00:45", 0.75)]
     #[case::last_minute_and_second_of_hour("1:59:59", 60.0 + 59.0 + 59.0 / 60.0)]
+    #[case::hours_with_leading_zero("02:30:30", 120.0 + 30.0 + 30.0 / 60.0)]
     fn parses_valid_duration(#[case] input: &str, #[case] expected: f64) {
         assert_close(parse_duration(input).unwrap(), expected);
     }

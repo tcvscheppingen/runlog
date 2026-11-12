@@ -107,7 +107,9 @@ mod tests {
     #[test]
     fn route_distance_sums_points_in_segment() {
         let mut track: Track = Track::new();
-        track.segments.push(segment(&[(0.0, 0.0), (0.0, 1.0), (0.0, 2.0)]));
+        track
+            .segments
+            .push(segment(&[(0.0, 0.0), (0.0, 1.0), (0.0, 2.0)]));
 
         assert_close(route_distance(&track).unwrap(), 2.0 * one_degree());
     }

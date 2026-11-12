@@ -21,7 +21,23 @@ This project is intended as a personal learning project to teach myself some Rus
   cargo build --release
 ```
 
-3. The build is in `runlog/target/release/`, you can move it to `~/.local/bin/` to make it accessible from the terminal.
+Or:
+
+```bash
+  make build
+```
+
+3. Install the build:
+
+```bash
+  sudo make install
+``` 
+
+To uninstall `runlog` use the following command:
+
+```bash
+  sudo make uninstall
+```
 
 ### Usage
 
@@ -30,8 +46,11 @@ Use `runlog` with a gpx file you created. You can create one with a website like
 As of now `runlog` can only calculate the average pace and distance of your run, more features will be added.
 
 ```bash
-  runlog name-of-gpx-file.gpx MM:SS # Replace MM:SS with the duration of the run.
+  runlog name-of-gpx-file.gpx HH:MM:SS # Replace HH:MM:SS with the duration of the run.
 ```
 
+The duration input can be used as follows:
 
-
+- `HH:MM:SS` for example: `02:35:36`, where the leading `0` can be left out.
+- `MM:SS` for example: `35:36`.
+- `MM` for example: `35`.
