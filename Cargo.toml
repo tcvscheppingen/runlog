@@ -9,3 +9,4 @@ gpx = "0.10.0"
 [dev-dependencies]
 # Same major version as gpx uses, so Waypoint::new accepts our Points
 geo-types = "0.7"
+rstest = "0.28.0"

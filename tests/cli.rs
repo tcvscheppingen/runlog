@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
+use rstest::rstest;
+
 // Path to a file in tests/fixtures
 fn fixture(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -24,10 +26,14 @@ fn stderr(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).into_owned()
 }
 
-#[test]
-fn valid_route_prints_total_distance() {
+#[rstest]
+#[case::whole_minutes("18")]
+#[case::minutes_and_seconds("18:00")]
+#[case::hours_minutes_and_seconds("0:18:00")]
+fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
+    // Every case is the same 18 minute run, so the pace must match
     let path = fixture("onthegomap-3.1-km-route.gpx");
-    let output = run(&[path.to_str().unwrap(), "18"]);
+    let output = run(&[path.to_str().unwrap(), duration]);
 
     assert_eq!(output.status.code(), Some(0));
     assert_eq!(
@@ -44,47 +50,30 @@ fn missing_argument_prints_usage() {
     assert!(stderr(&output).contains("Usage: runlog <file.gpx>"));
 }
 
-#[test]
-fn invalid_duration_fails_without_panic() {
+#[rstest]
+#[case::non_numeric("abc")]
+#[case::minutes_of_sixty_with_hours("1:60:00")]
+fn invalid_duration_fails_without_panic(#[case] duration: &str) {
     let path = fixture("onthegomap-3.1-km-route.gpx");
-    let output = run(&[path.to_str().unwrap(), "abc"]);
+    let output = run(&[path.to_str().unwrap(), duration]);
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Invalid duration abc"));
+    assert!(stderr(&output).contains(&format!("Invalid duration {duration}")));
 }
 
-#[test]
-fn missing_file_fails_without_panic() {
-    let path = fixture("does-not-exist.gpx");
+#[rstest]
+#[case::missing_file("does-not-exist.gpx", "Unable to open")]
+#[case::not_gpx("not-gpx.txt", "Unable to parse gpx in")]
+#[case::no_tracks("no-tracks.gpx", "GPX file contains no tracks")]
+#[case::no_segments("no-segments.gpx", "Track contains no segments")]
+fn broken_gpx_file_fails_without_panic(#[case] name: &str, #[case] expected: &str) {
+    let path = fixture(name);
     let output = run(&[path.to_str().unwrap(), "18"]);
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Unable to open"));
-}
-
-#[test]
-fn invalid_gpx_prints_parse_error() {
-    let path = fixture("not-gpx.txt");
-    let output = run(&[path.to_str().unwrap(), "18"]);
-
-    assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Unable to parse gpx in"));
-}
-
-#[test]
-fn gpx_without_tracks_fails() {
-    let path = fixture("no-tracks.gpx");
-    let output = run(&[path.to_str().unwrap(), "18"]);
-
-    assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("GPX file contains no tracks"));
-}
-
-#[test]
-fn track_without_segments_fails() {
-    let path = fixture("no-segments.gpx");
-    let output = run(&[path.to_str().unwrap(), "18"]);
-
-    assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Track contains no segments"));
+    assert!(
+        stderr(&output).contains(expected),
+        "got: {}",
+        stderr(&output)
+    );
 }

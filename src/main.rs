@@ -31,19 +31,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Total distance: {:.2} km", total_distance / 1000.0);
 
-    // let duration: f64 =
-    //     parse_duration(&duration).map_err(|e| format!("Invalid duration {duration}: {e}"))?;
-    // let pace: f64 = calculate_pace(total_distance, duration);
-    //
-    let time_input: Vec<_> = duration.split(":").collect();
+    let duration: f64 =
+        parse_duration(&duration).map_err(|e| format!("Invalid duration {duration}: {e}"))?;
+    let pace: f64 = calculate_pace(total_distance, duration);
 
-    println!("{:?}", time_input);
-
-    for split in time_input {
-        println!("{split}");
-    }
-
-    // println!("Pace: {} min/km", format_pace(pace));
+    println!("Pace: {} min/km", format_pace(pace));
 
     Ok(())
 }
