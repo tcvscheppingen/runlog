@@ -17,28 +17,46 @@ fn validate_duration(minutes: f64, seconds: f64) -> Result<(), String> {
 
 /// Parse duration input.
 pub fn parse_duration(input: &str) -> Result<f64, String> {
-    match input.split_once(":") {
-        Some((minutes, seconds)) => {
-            let minutes: f64 = minutes
-                .parse()
-                .map_err(|e| format!("Invalid minutes '{minutes}': {e}"))?;
+    let split_input: Vec<&str> = input.split(":").collect();
 
-            let seconds: f64 = seconds
-                .parse()
-                .map_err(|e| format!("Invalid seconds '{seconds}': {e}"))?;
+    if split_input.iter().count() == 3 {
+        let hours = split_input[0];
+        let minutes = split_input[1];
+        let seconds = split_input[2];
 
-            validate_duration(minutes, seconds)?;
+        let hours: f64 = split_input[0]
+            .parse()
+            .map_err(|e| format!("Invalid hours '{hours}: {e}'"))?;
+        let minutes: f64 = split_input[1]
+            .parse()
+            .map_err(|e| format!("Invalid hours '{minutes}: {e}'"))?;
+        let seconds: f64 = split_input[2]
+            .parse()
+            .map_err(|e| format!("Invalid hours '{seconds}: {e}'"))?;
+    } else {
+        match input.split_once(":") {
+            Some((minutes, seconds)) => {
+                let minutes: f64 = minutes
+                    .parse()
+                    .map_err(|e| format!("Invalid minutes '{minutes}': {e}"))?;
 
-            Ok(minutes + seconds / 60.0)
-        }
-        None => {
-            let minutes: f64 = input
-                .parse()
-                .map_err(|e| format!("Unable to parse input '{input}': {e}"))?;
+                let seconds: f64 = seconds
+                    .parse()
+                    .map_err(|e| format!("Invalid seconds '{seconds}': {e}"))?;
 
-            validate_duration(minutes, 0.0)?;
+                validate_duration(minutes, seconds)?;
 
-            Ok(minutes)
+                Ok(minutes + seconds / 60.0)
+            }
+            None => {
+                let minutes: f64 = input
+                    .parse()
+                    .map_err(|e| format!("Unable to parse input '{input}': {e}"))?;
+
+                validate_duration(minutes, 0.0)?;
+
+                Ok(minutes)
+            }
         }
     }
 }
