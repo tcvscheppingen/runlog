@@ -3,14 +3,12 @@ use std::process::{Command, Output};
 
 use rstest::rstest;
 
-// Path to a file in tests/fixtures
 fn fixture(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures")
         .join(name)
 }
 
-// Run the compiled binary with the given arguments
 fn run(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_runlog"))
         .args(args)
@@ -31,11 +29,12 @@ fn stderr(output: &Output) -> String {
 #[case::minutes_and_seconds("18:00")]
 #[case::hours_minutes_and_seconds("0:18:00")]
 fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
-    // Every case is the same 18 minute run, so the pace must match
     let path = fixture("onthegomap-3.1-km-route.gpx");
-    let output = run(&[path.to_str().unwrap(), duration]);
+    let path = path.to_str().unwrap();
 
-    assert_eq!(output.status.code(), Some(0));
+    let output = run(&["--route", path, "--duration", duration]);
+
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
     assert_eq!(
         stdout(&output).trim(),
         "Total distance: 3.16 km\nPace: 5:42 min/km"
@@ -43,11 +42,23 @@ fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
 }
 
 #[test]
-fn missing_argument_prints_usage() {
+fn missing_route_and_duration_prints_clap_usage() {
     let output = run(&[]);
 
-    assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains("Usage: runlog <file.gpx>"));
+    // With no required arguments configured, clap accepts an empty invocation.
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    assert!(stdout(&output).is_empty());
+}
+
+#[test]
+fn route_without_duration_prints_distance() {
+    let path = fixture("onthegomap-3.1-km-route.gpx");
+    let path = path.to_str().unwrap();
+
+    let output = run(&["-r", path]);
+
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    assert_eq!(stdout(&output).trim(), "Total distance: 3.16 km");
 }
 
 #[rstest]
@@ -55,10 +66,16 @@ fn missing_argument_prints_usage() {
 #[case::minutes_of_sixty_with_hours("1:60:00")]
 fn invalid_duration_fails_without_panic(#[case] duration: &str) {
     let path = fixture("onthegomap-3.1-km-route.gpx");
-    let output = run(&[path.to_str().unwrap(), duration]);
+    let path = path.to_str().unwrap();
+
+    let output = run(&["--route", path, "--duration", duration]);
 
     assert_eq!(output.status.code(), Some(1));
-    assert!(stderr(&output).contains(&format!("Invalid duration {duration}")));
+    assert!(
+        stderr(&output).contains(&format!("Invalid duration {duration}")),
+        "got: {}",
+        stderr(&output)
+    );
 }
 
 #[rstest]
@@ -68,7 +85,9 @@ fn invalid_duration_fails_without_panic(#[case] duration: &str) {
 #[case::no_segments("no-segments.gpx", "Track contains no segments")]
 fn broken_gpx_file_fails_without_panic(#[case] name: &str, #[case] expected: &str) {
     let path = fixture(name);
-    let output = run(&[path.to_str().unwrap(), "18"]);
+    let path = path.to_str().unwrap();
+
+    let output = run(&["--route", path]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(

@@ -50,6 +50,20 @@ pub fn route_distance(track: &Track) -> Result<f64, String> {
     Ok(total_distance)
 }
 
+pub fn get_distance_from_route(route: &str) -> Result<f64, String> {
+    let gpx: Gpx = load_gpx(route)?;
+
+    let track: &Track = gpx.tracks.first().ok_or("GPX file contains no tracks")?;
+
+    let total_distance: f64 = route_distance(track)?;
+
+    Ok(total_distance)
+}
+
+pub fn print_distance(distance: f64) {
+    println!("Total distance: {:.2} km", distance / 1000.0);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -5,6 +5,7 @@ build:
 	$(shell [ "$EUID" = "0" ] && echo "build can not be run as root" && exit 1)
 	@echo ":: Rebuilding in release mode..."
 	@cargo build --release
+	@echo ":: Done"
 
 .PHONY: install
 install:
