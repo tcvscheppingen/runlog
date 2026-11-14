@@ -1,6 +1,13 @@
 #!/bin/sh
 
-rustfmt
+echo "formatting code"
+cargo fmt --all
+
+echo "checking code"
 cargo check
+
+echo "testing project"
 cargo test
-cargo clippy
+
+echo "running clippy"
+cargo clippy --all-targets --all-features -- -D warnings
