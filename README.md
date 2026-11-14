@@ -3,12 +3,12 @@ A small CLI tool to track your runs.
 
 This project is intended as a personal learning project to teach myself some Rust programming.
 
-### Requirements
+## Requirements
 
 - Rust
 - Cargo
 
-### Installation
+## Installation
 
 1. Clone the project
 ```bash
@@ -16,18 +16,18 @@ This project is intended as a personal learning project to teach myself some Rus
   cd runlog
 ```
 
-2. Build `runlog`
+### Build `runlog`
 ```bash
-  cargo build --release
+  make build
 ```
 
 Or:
 
 ```bash
-  make build
+  cargo build --release
 ```
 
-3. Install the build:
+### Install the build:
 
 ```bash
   sudo make install
@@ -39,7 +39,7 @@ To uninstall `runlog` use the following command:
   sudo make uninstall
 ```
 
-### Usage
+## Usage
 
 > Use `runlog -h` to view usage information.
 

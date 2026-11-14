@@ -42,12 +42,15 @@ fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
 }
 
 #[test]
-fn missing_route_and_duration_prints_clap_usage() {
+fn missing_route_and_duration_prints_clap_help() {
     let output = run(&[]);
 
-    // With no required arguments configured, clap accepts an empty invocation.
-    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
-    assert!(stdout(&output).is_empty());
+    assert_eq!(output.status.code(), Some(2));
+
+    let help = format!("{}{}", stdout(&output), stderr(&output));
+    assert!(help.contains("Usage:"));
+    assert!(help.contains("--route"));
+    assert!(help.contains("--duration"));
 }
 
 #[test]

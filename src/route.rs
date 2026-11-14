@@ -14,7 +14,7 @@ fn haversine(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
 }
 
 /// Load a GPX file from path.
-pub fn load_gpx(path: &str) -> Result<Gpx, String> {
+fn load_gpx(path: &str) -> Result<Gpx, String> {
     let file: File = File::open(path).map_err(|e| format!("Unable to open {path}: {e}"))?;
 
     let reader: BufReader<File> = BufReader::new(file);
