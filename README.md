@@ -56,7 +56,7 @@ Use `runlog` with a gpx file you created. You can create one with a website like
 As of now `runlog` can only calculate the average pace and distance of your run, more features will be added.
 
 ```bash
-  runlog -r name-of-gpx-file.gpx -d HH:MM:SS # Replace HH:MM:SS with the duration of the run.
+  runlog pace -r name-of-gpx-file.gpx -d HH:MM:SS # Replace HH:MM:SS with the duration of the run.
 ```
 
 The duration input can be used as follows:
