@@ -1,7 +1,7 @@
 use gpx::Gpx;
 use gpx::Track;
 use gpx::read;
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::BufReader, path::Path};
 
 const EARTH_RADIUS: f64 = 6371008.7714;
 
@@ -14,12 +14,13 @@ fn haversine(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
 }
 
 /// Load a GPX file from path.
-fn load_gpx(path: &str) -> Result<Gpx, String> {
-    let file: File = File::open(path).map_err(|e| format!("Unable to open {path}: {e}"))?;
+fn load_gpx(path: &Path) -> Result<Gpx, String> {
+    let file: File =
+        File::open(path).map_err(|e| format!("Unable to open {}: {e}", path.display()))?;
 
     let reader: BufReader<File> = BufReader::new(file);
 
-    read(reader).map_err(|e| format!("Unable to parse gpx in {path}: {e}"))
+    read(reader).map_err(|e| format!("Unable to parse gpx in {}: {e}", path.display()))
 }
 
 /// Calculate the distance of a route in a GPX file.
@@ -50,7 +51,7 @@ pub fn route_distance(track: &Track) -> Result<f64, String> {
     Ok(total_distance)
 }
 
-pub fn get_distance_from_route(route: &str) -> Result<f64, String> {
+pub fn get_distance_from_route(route: &Path) -> Result<f64, String> {
     let gpx: Gpx = load_gpx(route)?;
 
     let track: &Track = gpx.tracks.first().ok_or("GPX file contains no tracks")?;
