@@ -4,16 +4,16 @@ pub fn parse_distance(distance: &str) -> Result<f64, String> {
         .parse()
         .map_err(|e| format!("Unable to parse distance '{distance}': {e}"))?;
 
-    if distance <= 0.0 {
-        return Err("Distance must be greater than 0.0".to_string());
-    }
-
     if distance.is_nan() {
         return Err("Distance must be a number".to_string());
     }
 
     if distance.is_infinite() {
         return Err("Distance cannot be infinite".to_string());
+    }
+
+    if distance <= 0.0 {
+        return Err("Distance must be greater than 0.0".to_string());
     }
 
     Ok(distance)
