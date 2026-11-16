@@ -51,7 +51,7 @@ fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
     let path = fixture("onthegomap-3.1-km-route.gpx");
     let path = path.to_str().unwrap();
 
-    let output = run(&["--route", path, "--duration", duration]);
+    let output = run(&["pace", "--route", path, "--duration", duration]);
 
     assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
     assert_eq!(
@@ -61,15 +61,15 @@ fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
 }
 
 #[test]
-fn missing_route_and_duration_prints_clap_help() {
+fn no_subcommand_prints_clap_help() {
     let output = run(&[]);
 
     assert_eq!(output.status.code(), Some(2));
 
     let help = format!("{}{}", stdout(&output), stderr(&output));
     assert!(help.contains("Usage:"));
-    assert!(help.contains("--route"));
-    assert!(help.contains("--duration"));
+    assert!(help.contains("pace"));
+    assert!(help.contains("init"));
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn route_without_duration_prints_distance() {
     let path = fixture("onthegomap-3.1-km-route.gpx");
     let path = path.to_str().unwrap();
 
-    let output = run(&["-r", path]);
+    let output = run(&["pace", "-r", path]);
 
     assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
     assert_eq!(stdout(&output).trim(), "Total distance: 3.16 km");
@@ -85,7 +85,7 @@ fn route_without_duration_prints_distance() {
 
 #[test]
 fn duration_without_route_fails() {
-    let output = run(&["--duration", "18:00"]);
+    let output = run(&["pace", "--duration", "18:00"]);
 
     assert_eq!(output.status.code(), Some(2));
     assert!(
@@ -102,7 +102,7 @@ fn invalid_duration_fails_without_panic(#[case] duration: &str, #[case] reason: 
     let path = fixture("onthegomap-3.1-km-route.gpx");
     let path = path.to_str().unwrap();
 
-    let output = run(&["--route", path, "--duration", duration]);
+    let output = run(&["pace", "--route", path, "--duration", duration]);
 
     assert_eq!(output.status.code(), Some(2));
 
@@ -123,7 +123,7 @@ fn broken_gpx_file_fails_without_panic(#[case] name: &str, #[case] expected: &st
     let path = fixture(name);
     let path = path.to_str().unwrap();
 
-    let output = run(&["--route", path]);
+    let output = run(&["pace", "--route", path]);
 
     assert_eq!(output.status.code(), Some(1));
     assert!(
@@ -193,4 +193,69 @@ fn init_cannot_be_combined_with_route() {
 
     assert_eq!(output.status.code(), Some(2));
     assert!(!dir.join("running-log.csv").exists());
+}
+
+#[rstest]
+#[case::matches_fixture_route("3.16", "18", "Total distance: 3.16 km\nPace: 5:42 min/km")]
+#[case::whole_kilometres("10", "50:00", "Total distance: 10.00 km\nPace: 5:00 min/km")]
+#[case::with_hours("21.1", "1:45:30", "Total distance: 21.10 km\nPace: 5:00 min/km")]
+fn distance_with_duration_prints_pace(
+    #[case] distance: &str,
+    #[case] duration: &str,
+    #[case] expected: &str,
+) {
+    let output = run(&["pace", "--distance", distance, "--duration", duration]);
+
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    assert_eq!(stdout(&output).trim(), expected);
+}
+
+#[test]
+fn distance_without_duration_prints_distance() {
+    let output = run(&["pace", "--distance", "5"]);
+
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    assert_eq!(stdout(&output).trim(), "Total distance: 5.00 km");
+}
+
+#[test]
+fn route_and_distance_cannot_be_combined() {
+    let path = fixture("onthegomap-3.1-km-route.gpx");
+    let path = path.to_str().unwrap();
+
+    let output = run(&["pace", "--route", path, "--distance", "5"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = stderr(&output);
+    assert!(stderr.contains("cannot be used with"), "got: {stderr}");
+    assert!(stderr.contains("--route"), "got: {stderr}");
+    assert!(stderr.contains("--distance"), "got: {stderr}");
+}
+
+#[test]
+fn pace_without_route_or_distance_fails() {
+    let output = run(&["pace"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = stderr(&output);
+    assert!(stderr.contains("--route"), "got: {stderr}");
+    assert!(stderr.contains("--distance"), "got: {stderr}");
+}
+
+#[rstest]
+#[case::non_numeric("abc")]
+#[case::zero("0")]
+#[case::negative("-5")]
+#[case::not_a_number("NaN")]
+#[case::infinite("inf")]
+fn invalid_distance_fails_without_panic(#[case] distance: &str) {
+    // `--distance=<value>` so clap doesn't read "-5" as a flag
+    let output = run(&["pace", &format!("--distance={distance}")]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = stderr(&output);
+    assert!(
+        stderr.contains(&format!("invalid value '{distance}' for '--distance")),
+        "got: {stderr}"
+    );
 }
