@@ -1,13 +1,13 @@
 #!/bin/sh
 
-echo "formatting code"
-cargo fmt --all
+# Abort the commit as soon as a step fails
+set -e
 
-echo "checking code"
-cargo check
-
-echo "testing project"
-cargo test
+echo "checking formatting"
+cargo fmt --all -- --check
 
 echo "running clippy"
 cargo clippy --all-targets --all-features -- -D warnings
+
+echo "testing project"
+cargo test

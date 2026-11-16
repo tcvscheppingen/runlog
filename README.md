@@ -39,6 +39,14 @@ To uninstall `runlog` use the following command:
   sudo make uninstall
 ```
 
+## Development
+
+Enable the git hooks so formatting, clippy and the tests run before every commit:
+
+```bash
+  make hooks
+```
+
 ## Usage
 
 > Use `runlog -h` to view usage information.

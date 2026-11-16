@@ -7,6 +7,12 @@ build:
 	@cargo build --release
 	@echo ":: Done"
 
+.PHONY: hooks
+hooks:
+	@echo ":: Enabling git hooks..."
+	@git config core.hooksPath githooks
+	@echo ":: Done"
+
 .PHONY: install
 install:
 	@echo ":: Installing binaries..."
