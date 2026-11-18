@@ -1,4 +1,5 @@
 use serde::Serialize;
+use std::error::Error;
 use std::{fs::OpenOptions, path::Path};
 
 const HEADERS: [&str; 3] = ["Date", "Distance", "Pace"];
@@ -7,7 +8,7 @@ const HEADERS: [&str; 3] = ["Date", "Distance", "Pace"];
 #[allow(dead_code)]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "PascalCase")]
-struct Record<'a> {
+pub struct Record<'a> {
     date: &'a str,
     distance: f64,
     pace: &'a str,
@@ -32,6 +33,25 @@ pub fn create_run_log_file(path: &Path) -> Result<(), String> {
     log_file
         .flush()
         .map_err(|e| format!("Unable to write {}: {e}", path.display()))
+}
+
+/// Add a new record to the running log.
+pub fn add_record(path: &Path, record: Record) -> Result<(), Box<dyn Error>> {
+    let file = OpenOptions::new().create(true).append(true).open(path)?;
+
+    let mut writer = csv::WriterBuilder::new()
+        .has_headers(true)
+        .from_writer(file);
+
+    writer.serialize(Record {
+        date: record.date,
+        distance: record.distance,
+        pace: record.pace,
+    })?;
+
+    writer.flush()?;
+
+    Ok(())
 }
 
 #[cfg(test)]

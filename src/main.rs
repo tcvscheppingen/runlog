@@ -44,33 +44,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand_required(true)
         .arg_required_else_help(true)
         .subcommand(
-            Command::new("pace")
-                .about("use a route and duration to calculate the distance and pace of a run")
-                .arg(
-                    Arg::new("route")
-                        .value_parser(value_parser!(PathBuf))
-                        .short('r')
-                        .long("route")
-                        .help("Get the distance of a route from a GPX file"),
-                )
-                .arg(
-                    Arg::new("distance")
-                        .long("distance")
-                        .value_parser(distance::parse_distance)
-                        .help("Distance of the run in kilometres"),
-                )
-                .arg(
-                    Arg::new("duration")
-                        .value_parser(duration::parse_duration)
-                        .short('d')
-                        .long("duration")
-                        .help("Use with --route or --distance to get the average pace of the run"),
-                )
-                .group(
-                    ArgGroup::new("length")
-                        .args(["route", "distance"])
-                        .required(true),
-                ),
+            generate_pace_args(Command::new("pace"))
+                .about("use a route and duration to calculate the distance and pace of a run"),
         )
         .subcommand(
             Command::new("init")
@@ -81,6 +56,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .value_parser(value_parser!(PathBuf)),
                 ),
         )
+        .subcommand(generate_pace_args(
+            Command::new("add")
+                .about("add a new record to the running log")
+                .arg(
+                    Arg::new("filename")
+                        .default_value("running-log.csv")
+                        .value_parser(value_parser!(PathBuf)),
+                ),
+        ))
         .get_matches();
 
     match matches.subcommand() {
@@ -104,6 +88,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Pace: {} min/km", format_pace(pace));
             }
         }
+        Some(("add", add_matches)) => {
+            let duration = add_matches.get_one::<f64>("duration").copied();
+
+            let distance: f64 = get_distance(add_matches)?;
+
+            if let Some(duration) = duration {
+                let pace: f64 = calculate_pace(distance, duration);
+            }
+        }
         // subcommand_required and the known subcommands are enforced by clap
         _ => unreachable!("clap rejects a missing or unknown subcommand"),
     }
@@ -122,4 +115,32 @@ fn get_distance(matches: &ArgMatches) -> Result<f64, String> {
         // The required "length" group allows exactly one of --route and --distance
         _ => unreachable!("clap requires either --route or --distance"),
     }
+}
+
+fn generate_pace_args(cmd: Command) -> Command {
+    cmd.arg(
+        Arg::new("route")
+            .value_parser(value_parser!(PathBuf))
+            .short('r')
+            .long("route")
+            .help("Get the distance of a route from a GPX file"),
+    )
+    .arg(
+        Arg::new("distance")
+            .long("distance")
+            .value_parser(distance::parse_distance)
+            .help("Distance of the run in kilometres"),
+    )
+    .arg(
+        Arg::new("duration")
+            .value_parser(duration::parse_duration)
+            .short('d')
+            .long("duration")
+            .help("Use with --route or --distance to get the average pace of the run"),
+    )
+    .group(
+        ArgGroup::new("length")
+            .args(["route", "distance"])
+            .required(true),
+    )
 }
