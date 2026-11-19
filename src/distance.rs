@@ -19,27 +19,10 @@ pub fn parse_distance(distance: &str) -> Result<f64, String> {
     Ok(distance)
 }
 
-pub fn get_formatted_distance(distance: f64) -> String {
-    if distance >= 1000.0 {
-        format!("{:.2} km", distance / 1000.0)
-    } else {
-        format!("{} m", distance.trunc())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use rstest::rstest;
-
-    #[rstest]
-    #[case::thousand_meters(1000.0, "1.00 km")]
-    #[case::fifteen_hundred_meters(1500.0, "1.50 km")]
-    #[case::nine_hundred_meters(900.0, "900 m")]
-    #[case::ten_meters(10.0, "10 m")]
-    fn gets_formatted_distance(#[case] input: f64, #[case] expected: String) {
-        assert_eq!(get_formatted_distance(input), expected);
-    }
 
     // --- parse_distance: valid input ---
 

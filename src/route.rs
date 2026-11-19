@@ -1,6 +1,6 @@
-use gpx::read;
 use gpx::Gpx;
 use gpx::Track;
+use gpx::read;
 use std::{fs::File, io::BufReader, path::Path};
 
 const EARTH_RADIUS: f64 = 6371008.7714;
@@ -51,6 +51,7 @@ pub fn route_distance(track: &Track) -> Result<f64, String> {
     Ok(total_distance)
 }
 
+/// Get the distance of a route in a GPX file in meters.
 pub fn get_distance_from_route(route: &Path) -> Result<f64, String> {
     let gpx: Gpx = load_gpx(route)?;
 
@@ -61,15 +62,20 @@ pub fn get_distance_from_route(route: &Path) -> Result<f64, String> {
     Ok(total_distance)
 }
 
-pub fn print_distance(distance: f64) {
-    println!("Total distance: {:.2} km", distance / 1000.0);
+/// Formats the given distance to KM or M
+pub fn get_formatted_distance(distance: f64) -> String {
+    if distance >= 1000.0 {
+        format!("{:.2} km", distance / 1000.0)
+    } else {
+        format!("{} m", distance.trunc())
+    }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use geo_types::Point;
     use gpx::{TrackSegment, Waypoint};
+    use rstest::rstest;
 
     // Build a segment from (longitude, latitude) pairs in degrees
     fn segment(points: &[(f64, f64)]) -> TrackSegment {
@@ -90,6 +96,16 @@ mod tests {
             (actual - expected).abs() < 1e-6,
             "expected {expected}, got {actual}"
         );
+    }
+
+    // --- formatting distance ---
+    #[rstest]
+    #[case::thousand_meters(1000.0, "1.00 km")]
+    #[case::fifteen_hundred_meters(1500.0, "1.50 km")]
+    #[case::nine_hundred_meters(900.0, "900 m")]
+    #[case::ten_meters(10.0, "10 m")]
+    fn gets_formatted_distance(#[case] input: f64, #[case] expected: String) {
+        assert_eq!(get_formatted_distance(input), expected);
     }
 
     // --- haversine ---
