@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand_required(true)
         .arg_required_else_help(true)
         .subcommand(
-            generate_pace_args(Command::new("pace"))
+            generate_pace_args(Command::new("pace"), false)
                 .about("use a route and duration to calculate the distance and pace of a run"),
         )
         .subcommand(
@@ -58,15 +58,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .value_parser(value_parser!(PathBuf)),
                 ),
         )
-        .subcommand(generate_pace_args(
-            Command::new("add")
+        .subcommand(
+            generate_pace_args(Command::new("add"), true)
                 .about("add a new record to the running log")
                 .arg(
                     Arg::new("filename")
                         .default_value("running-log.csv")
                         .value_parser(value_parser!(PathBuf)),
                 ),
-        ))
+        )
         .get_matches();
 
     match matches.subcommand() {
@@ -141,7 +141,7 @@ fn get_distance(matches: &ArgMatches) -> Result<f64, String> {
     }
 }
 
-fn generate_pace_args(cmd: Command) -> Command {
+fn generate_pace_args(cmd: Command, duration_required: bool) -> Command {
     cmd.arg(
         Arg::new("route")
             .value_parser(value_parser!(PathBuf))
@@ -160,6 +160,7 @@ fn generate_pace_args(cmd: Command) -> Command {
             .value_parser(duration::parse_duration)
             .short('d')
             .long("duration")
+            .required(duration_required)
             .help("Use with --route or --distance to get the average pace of the run"),
     )
     .group(
