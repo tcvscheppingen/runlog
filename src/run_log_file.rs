@@ -2,16 +2,15 @@ use serde::Serialize;
 use std::error::Error;
 use std::{fs::OpenOptions, path::Path};
 
-const HEADERS: [&str; 3] = ["Date", "Distance", "Pace"];
+const HEADERS: [&str; 4] = ["Date", "Distance", "Duration", "Pace"];
 
-// Not written yet by the CLI; the header test keeps HEADERS in sync with it.
-#[allow(dead_code)]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Record<'a> {
-    date: &'a str,
-    distance: f64,
-    pace: &'a str,
+    pub date: &'a str,
+    pub distance: &'a str,
+    pub duration: f64,
+    pub pace: &'a str,
 }
 
 /// Create a new running log containing only the header row.
@@ -40,12 +39,13 @@ pub fn add_record(path: &Path, record: Record) -> Result<(), Box<dyn Error>> {
     let file = OpenOptions::new().create(true).append(true).open(path)?;
 
     let mut writer = csv::WriterBuilder::new()
-        .has_headers(true)
+        .has_headers(false)
         .from_writer(file);
 
     writer.serialize(Record {
         date: record.date,
         distance: record.distance,
+        duration: record.duration,
         pace: record.pace,
     })?;
 
@@ -64,7 +64,8 @@ mod tests {
         writer
             .serialize(Record {
                 date: "2026-11-16",
-                distance: 3160.0,
+                distance: "3.16",
+                duration: 18.0,
                 pace: "5:42",
             })
             .unwrap();

@@ -4,7 +4,7 @@ use std::process::{Command, Output};
 
 use rstest::rstest;
 
-const LOG_HEADER: &str = "Date,Distance,Pace\n";
+const LOG_HEADER: &str = "Date,Distance,Duration,Pace\n";
 
 fn fixture(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))

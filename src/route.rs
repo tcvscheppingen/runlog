@@ -1,6 +1,6 @@
+use gpx::read;
 use gpx::Gpx;
 use gpx::Track;
-use gpx::read;
 use std::{fs::File, io::BufReader, path::Path};
 
 const EARTH_RADIUS: f64 = 6371008.7714;
