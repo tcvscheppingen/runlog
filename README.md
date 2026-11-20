@@ -85,3 +85,4 @@ You can add records to the log with the following command:
 ```bash
 runlog add --route path/to/gpx-file.gpx --duration 2:35:36 name-of-running-log.csv
 ```
+You can leave the name of the running log blank to use the default `running-log.csv`
