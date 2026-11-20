@@ -19,6 +19,14 @@ pub fn parse_distance(distance: &str) -> Result<f64, String> {
     Ok(distance)
 }
 
+pub fn meters_to_kilometers(distance: f64) -> f64 {
+    distance / 1000.0
+}
+
+pub fn kilometers_to_meters(distance: f64) -> f64 {
+    distance * 1000.0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

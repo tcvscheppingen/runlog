@@ -1,6 +1,8 @@
+use crate::distance::meters_to_kilometers;
+
 /// Calculate running pace in min/km.
 pub fn calculate_pace(distance: f64, duration: f64) -> f64 {
-    duration / (distance / 1000.0)
+    duration / (meters_to_kilometers(distance))
 }
 
 /// Format a pace in decimal minutes as mm:ss (e.g. 5.5 -> "5:30").

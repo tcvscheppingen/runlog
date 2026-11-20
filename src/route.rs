@@ -3,6 +3,8 @@ use gpx::Track;
 use gpx::read;
 use std::{fs::File, io::BufReader, path::Path};
 
+use crate::distance::meters_to_kilometers;
+
 const EARTH_RADIUS: f64 = 6371008.7714;
 
 /// Use the Haversine formula to calculate the distance between two coordinates.
@@ -62,10 +64,10 @@ pub fn get_distance_from_route(route: &Path) -> Result<f64, String> {
     Ok(total_distance)
 }
 
-/// Formats the given distance to KM or M
+/// Formats the given distance to a readable format in kilometers or to meters.
 pub fn get_formatted_distance(distance: f64) -> String {
     if distance >= 1000.0 {
-        format!("{:.2} km", distance / 1000.0)
+        format!("{:.2} km", meters_to_kilometers(distance))
     } else {
         format!("{} m", distance.trunc())
     }

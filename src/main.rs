@@ -20,6 +20,7 @@ use pace::format_pace;
 
 mod route;
 
+use crate::distance::kilometers_to_meters;
 use crate::route::get_distance_from_route;
 use crate::route::get_formatted_distance;
 
@@ -95,6 +96,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let distance: f64 = get_distance(add_matches)?;
 
+            let current_date = jiff::ZonedDateTime::now().strftime("%d-%m-%Y");
+
             let path = add_matches
                 .get_one::<PathBuf>("filename")
                 .expect("expected filename");
@@ -105,7 +108,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let pace: f64 = calculate_pace(distance, duration);
                 let pace: String = format_pace(pace);
                 let record: Record = Record {
-                    date: "18-11-2027", // TODO: use current date instead of placeholder
+                    date: &current_date.to_string(),
                     distance: &formatted_distance,
                     duration, // TODO: use HH:MM:SS format.
                     pace: &pace,
@@ -135,7 +138,8 @@ fn get_distance(matches: &ArgMatches) -> Result<f64, String> {
 
     match (route, distance) {
         (Some(route), None) => get_distance_from_route(route),
-        (None, Some(distance)) => Ok(distance * 1000.0),
+
+        (None, Some(distance)) => Ok(kilometers_to_meters(distance)),
         // The required "length" group allows exactly one of --route and --distance
         _ => unreachable!("clap requires either --route or --distance"),
     }
