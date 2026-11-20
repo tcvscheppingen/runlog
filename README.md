@@ -49,11 +49,11 @@ Enable the git hooks so formatting, clippy and the tests run before every commit
 
 ## Usage
 
-> Use `runlog -h` to view usage information.
+> Use `runlog -h` to view complete usage information.
 
 Use `runlog` with a gpx file you created. You can create one with a website like: [How far did I run?](https://onthegomap.com/#/create).
 
-As of now `runlog` can only calculate the average pace and distance of your run, more features will be added.
+Calculate the distance of a route and the average pace based on a specified duration:
 
 ```bash
   runlog pace -r name-of-gpx-file.gpx -d HH:MM:SS # Replace HH:MM:SS with the duration of the run.
@@ -68,5 +68,20 @@ The duration input can be used as follows:
 You can also just calculate the distance of a route without the pace:
 
  ```bash
- runlog -r name-of-gpx-file.gpx
+ runlog dist name-of-gpx-file.gpx
  ```
+
+ ## Keeping a running log
+
+ You can use runlog to keep track of your running training in a spreadsheet.  
+ Use the following command to initialize a running log:
+
+ ```bash
+runlog init name-of-running-log.csv
+ ```
+
+You can add records to the log with the following command:
+
+```bash
+runlog add --route path/to/gpx-file.gpx --duration 2:35:36 name-of-running-log.csv
+```

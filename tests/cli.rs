@@ -61,6 +61,17 @@ fn valid_route_prints_distance_and_pace(#[case] duration: &str) {
 }
 
 #[test]
+fn distance_subcomand_prints_distance() {
+    let path = fixture("onthegomap-3.1-km-route.gpx");
+    let path = path.to_str().unwrap();
+
+    let output = run(&["dist", path]);
+
+    assert_eq!(output.status.code(), Some(0), "{}", stderr(&output));
+    assert_eq!(stdout(&output).trim(), "Total distance: 3.16 km");
+}
+
+#[test]
 fn no_subcommand_prints_clap_help() {
     let output = run(&[]);
 
@@ -70,6 +81,8 @@ fn no_subcommand_prints_clap_help() {
     assert!(help.contains("Usage:"));
     assert!(help.contains("pace"));
     assert!(help.contains("init"));
+    assert!(help.contains("dist"));
+    assert!(help.contains("add"));
 }
 
 #[test]

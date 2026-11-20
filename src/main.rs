@@ -45,7 +45,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .author("Thymen van Scheppingen")
         .about("A minimalist running tracker")
         .subcommand_required(true)
-        .arg_required_else_help(true)
+        .subcommand(
+            Command::new("dist")
+                .arg_required_else_help(true)
+                .alias("distance")
+                .about("calculate the distance of a route in a GPX file")
+                .arg(
+                    Arg::new("route")
+                        .value_parser(value_parser!(PathBuf))
+                        .help("Get the distance of a route from a GPX file"),
+                ),
+        )
         .subcommand(
             generate_pace_args(Command::new("pace"), false)
                 .about("use a route and duration to calculate the distance and pace of a run"),
@@ -124,6 +134,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 add_record(path, record)?
             }
         }
+        Some(("dist", distance_matches)) => {
+            let route = distance_matches.get_one::<PathBuf>("route");
+
+            if let Some(route) = route {
+                let distance: f64 = get_distance_from_route(route)?;
+                println!("Total distance: {}", get_formatted_distance(distance));
+            }
+        }
         // subcommand_required and the known subcommands are enforced by clap
         _ => unreachable!("clap rejects a missing or unknown subcommand"),
     }
@@ -172,4 +190,5 @@ fn generate_pace_args(cmd: Command, duration_required: bool) -> Command {
             .args(["route", "distance"])
             .required(true),
     )
+    .arg_required_else_help(true)
 }
