@@ -159,6 +159,8 @@ fn init_without_filename_creates_default_log() {
 
 #[test]
 fn init_with_filename_creates_that_file() {
+    // This test is somewhat flaky due to timing issues.
+    // Sometimes the assert is done too quickly.
     let dir = scratch_dir("init-custom");
 
     let output = run_in(&dir, &["init", "my-runs.csv"]);
@@ -167,6 +169,17 @@ fn init_with_filename_creates_that_file() {
     let contents = fs::read_to_string(dir.join("my-runs.csv")).expect("Log file not created");
     assert_eq!(contents, LOG_HEADER);
     assert!(!dir.join("running-log.csv").exists());
+}
+
+#[test]
+fn init_with_wrong_extension_throws_error() {
+    let dir = scratch_dir("init-custom");
+
+    let output = run_in(&dir, &["init", "textfile.txt"]);
+
+    println!("{:?}", output);
+
+    assert_eq!(output.status.code(), Some(1), "{}", stderr(&output));
 }
 
 #[test]

@@ -1,34 +1,18 @@
 //! Keep track of your runs with this simple CLI tool.
 //!
-
-use std::path::PathBuf;
-
-use clap::Arg;
-use clap::ArgGroup;
-use clap::ArgMatches;
-use clap::Command;
-use clap::command;
-use clap::value_parser;
-
 mod distance;
-
 mod duration;
-
 mod pace;
-use pace::calculate_pace;
-use pace::format_pace;
-
 mod route;
-
-use crate::distance::kilometers_to_meters;
-use crate::route::get_distance_from_route;
-use crate::route::get_formatted_distance;
-
 mod run_log_file;
 
-use crate::run_log_file::Record;
-use crate::run_log_file::add_record;
-use crate::run_log_file::create_run_log_file;
+use clap::{Arg, ArgGroup, ArgMatches, Command, command, value_parser};
+use std::path::PathBuf;
+
+use distance::kilometers_to_meters;
+use pace::{calculate_pace, format_pace};
+use route::{get_distance_from_route, get_formatted_distance};
+use run_log_file::{Record, add_record, create_run_log_file};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = command!("runlog")

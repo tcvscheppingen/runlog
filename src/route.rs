@@ -1,6 +1,4 @@
-use gpx::Gpx;
-use gpx::Track;
-use gpx::read;
+use gpx::{Gpx, Track, read};
 use std::{fs::File, io::BufReader, path::Path};
 
 use crate::distance::meters_to_kilometers;

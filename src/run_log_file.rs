@@ -1,6 +1,11 @@
 use serde::Serialize;
-use std::error::Error;
-use std::{fs::OpenOptions, path::Path};
+
+use std::{
+    error::Error,
+    ffi::OsStr,
+    fs::OpenOptions,
+    path::{Path, PathBuf},
+};
 
 const HEADERS: [&str; 4] = ["Date", "Distance", "Duration", "Pace"];
 
@@ -13,14 +18,31 @@ pub struct Record<'a> {
     pub pace: &'a str,
 }
 
+/// Checks if the given path contains a valid csv file.
+fn validate_csv_file(path: &Path, creating_new_file: bool) -> Result<PathBuf, String> {
+    match path.extension() {
+        Some(ext) if ext == OsStr::new("csv") => Ok(path.to_path_buf()),
+        Some(_) => Err("file extension must be csv".to_string()),
+        None => {
+            if creating_new_file {
+                Ok(path.with_extension("csv"))
+            } else {
+                Err("file extension must be csv".to_string())
+            }
+        }
+    }
+}
+
 /// Create a new running log containing only the header row.
 ///
 /// Fails if the file already exists, so an existing log is never overwritten.
 pub fn create_run_log_file(path: &Path) -> Result<(), String> {
+    let path = validate_csv_file(path, true)?;
+
     let file = OpenOptions::new()
         .write(true)
         .create_new(true)
-        .open(path)
+        .open(&path)
         .map_err(|e| format!("Unable to create {}: {e}", path.display()))?;
 
     let mut log_file = csv::Writer::from_writer(file);
@@ -36,7 +58,8 @@ pub fn create_run_log_file(path: &Path) -> Result<(), String> {
 
 /// Add a new record to the running log.
 pub fn add_record(path: &Path, record: Record) -> Result<(), Box<dyn Error>> {
-    let file = OpenOptions::new().create(true).append(true).open(path)?;
+    let path = validate_csv_file(path, false)?;
+    let file = OpenOptions::new().create(false).append(true).open(path)?;
 
     let mut writer = csv::WriterBuilder::new()
         .has_headers(false)
